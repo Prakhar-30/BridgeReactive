@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import '../../../lib/reactive-lib/src/abstract-base/AbstractCallback.sol';
+import 'lib/reactive-lib/src/abstract-base/AbstractCallback.sol';
 
 interface ITestToken {
     function mint(address to, uint256 amount) external;
@@ -9,7 +9,7 @@ interface ITestToken {
     function burnFrom(address from, uint256 amount) external;
 }
 
-contract TokenHandler {
+contract TokenHandler is AbstractCallback {
 
     constructor() AbstractCallback(address(0)) payable {}
 
@@ -48,6 +48,7 @@ contract TokenHandler {
      * @param amount The amount of tokens to burn
      */
     function burnTokens(
+        address /*spender*/,
         address tokenAddress,
         address user,
         uint256 amount
