@@ -12,7 +12,7 @@ interface ITestToken {
 contract TokenHandler is AbstractCallback {
 
     constructor() AbstractCallback(address(0)) payable {}
-
+    
 
     event TokensMinted(address token, address to, uint256 amount);
     event TokensBurned(address token, address from, uint256 amount);

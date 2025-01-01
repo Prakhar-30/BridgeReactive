@@ -11,7 +11,7 @@ contract TestToken is ERC20{
      * @param amount Amount of tokens to mint
      * @param user address of user where the handler mints the tokens
      */
-    function mint(address /*spender*/,address user,uint256 amount) external{
+    function mint(address user,uint256 amount) external{
         _mint(user, amount);
     }
     
