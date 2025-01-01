@@ -1,4 +1,4 @@
-# AutoTokenBridge Service
+# BridgeReactive
 
 A reactive smart contract-based bridging service that enables secure token transfers between different blockchain networks.
 
