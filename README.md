@@ -35,8 +35,8 @@ The AutoTokenBridge service facilitates cross-chain token transfers using reacti
 - sepoToken Contract: `0xc4dA73EB266E97359953Ba4658F968139DB0C4BD`
 
 ### Reactive-Kopli Chain
-- Token Handler: `0x598932D1474c0b4949e9291bA4424593a205c40C`
-- Token Bridge Reactive: `0x6fbdAf2893102003C92AeD5aAce9c74a8459f7a2`
+- Token Handler: `0x41eC9dEc7672ab1b6DdfDA6B2Bc2ADA602E283d5`
+- Token Bridge Reactive: `0x5251F7Fb656bD4E3d529Db9Fd63352f935fA5605`
 - Approval Listener: `0x2afaFD298b23b62760711756088F75B7409f5967`
 - kopliToken Contract: `0x6470135d3Ab88D91Bb0E6068805a25f426Df4007`
 
