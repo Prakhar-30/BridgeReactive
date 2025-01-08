@@ -5,8 +5,9 @@ import "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import "src/contracts/reactive-smart-contracts/approval-service/IApprovalClient.sol";
 import "src/contracts/reactive-smart-contracts/approval-service/ApprovalService.sol";
+import 'lib/reactive-lib/src/abstract-base/AbstractCallback.sol';
 
-contract RecordKeeper is Ownable, IApprovalClient{
+contract RecordKeeper is Ownable, IApprovalClient, AbstractCallback {
     // Approval service instance
     ApprovalService private immutable service;
     
@@ -57,8 +58,10 @@ contract RecordKeeper is Ownable, IApprovalClient{
         uint256 amount
     );
     
-    constructor(ApprovalService _service) {
-        service = _service;
+    
+    constructor(ApprovalService service_) AbstractCallback(address(0)) payable{
+        owner = msg.sender;
+        service = service_;
     }
     
     modifier onlyService() {
