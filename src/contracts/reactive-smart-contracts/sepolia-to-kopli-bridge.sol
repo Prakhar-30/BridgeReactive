@@ -222,9 +222,9 @@ contract TokenBridgeReactive is AbstractPausableReactive {
     // Chain and contract constants
     uint256 private constant ORIGIN_CHAIN_ID = 11155111;
     uint256 private constant DESTINATION_CHAIN_ID = 5318008;
-    address private constant ORIGIN_CONTRACT = 0xBE90D22f0ddC740e60101DDf02a8a396d09733D2;
-    address private constant DESTINATION_CONTRACT = 0x45008737C677b5251F65835ad9a3FB14750a2856;
-    uint64 private constant CALLBACK_GAS_LIMIT = 1000000;
+    address private constant ORIGIN_CONTRACT = 0x2B382312d63696c34C58257Ff7C6fB7A88ab68cE;
+    address private constant DESTINATION_CONTRACT = 0x01F7e833bc688420c712F15c4C9FE455620d57c3;
+    uint64 private constant CALLBACK_GAS_LIMIT = 3000000;
 
     // Event topic constants
     uint256 private constant EVENT_0_TOPIC_0 = 0x52d1932b2d8d6a97999f213ba0781cd05860c8ce4b35baf9b72ce2c17c101848;
@@ -281,7 +281,7 @@ contract TokenBridgeReactive is AbstractPausableReactive {
           // Call the destination contract with decoded parameters
           bytes memory payload = abi.encodeWithSignature(
             "mintTokens(address,address,address,uint256)",
-            address(0), address(uint160(topic_2)), address(uint160(topic_1)), topic_3
+            address(0), address(uint160(topic_1)), address(uint160(topic_2)), topic_3
           );
           emit Callback(DESTINATION_CHAIN_ID, DESTINATION_CONTRACT, CALLBACK_GAS_LIMIT, payload);
         }

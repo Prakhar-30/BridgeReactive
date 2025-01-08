@@ -5,8 +5,9 @@ import "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 import "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import "src/contracts/reactive-smart-contracts/approval-service/IApprovalClient.sol";
 import "src/contracts/reactive-smart-contracts/approval-service/ApprovalService.sol";
+import 'lib/reactive-lib/src/abstract-base/AbstractCallback.sol';
 
-contract Bridge is ReentrancyGuard, IApprovalClient {
+contract Bridge is ReentrancyGuard, IApprovalClient, AbstractCallback {
     // Owner of the contract
     address public immutable owner;
     
@@ -40,7 +41,7 @@ contract Bridge is ReentrancyGuard, IApprovalClient {
         address indexed destinationToken
     );
     
-    constructor(ApprovalService service_) {
+    constructor(ApprovalService service_) AbstractCallback(address(0)) payable{
         owner = msg.sender;
         service = service_;
     }
@@ -135,6 +136,8 @@ contract Bridge is ReentrancyGuard, IApprovalClient {
      * @dev Withdraws tokens back to user
      */
     function withdraw(
+        address /*spender*/,
+        address user,
         address tokenAddress,
         uint256 amount
     ) external nonReentrant {
@@ -142,19 +145,19 @@ contract Bridge is ReentrancyGuard, IApprovalClient {
         require(tokenAddress != address(0), "Invalid token address");
         
         require(
-            lockedTokens[msg.sender][tokenAddress] >= amount,
+            lockedTokens[user][tokenAddress] >= amount,
             "Insufficient locked tokens"
         );
         
-        lockedTokens[msg.sender][tokenAddress] -= amount;
+        lockedTokens[user][tokenAddress] -= amount;
         
         IERC20 token = IERC20(tokenAddress);
         require(
-            token.transfer(msg.sender, amount),
+            token.transfer(user, amount),
             "Transfer failed"
         );
         
-        emit TokensWithdrawn(msg.sender, tokenAddress, amount);
+        emit TokensWithdrawn(user, tokenAddress, amount);
     }
     
     function getDestinationToken(address originToken) external view returns (address) {
