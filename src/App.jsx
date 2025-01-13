@@ -1,35 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+/* eslint-disable react/jsx-no-comment-textnodes */
+// App.jsx
+import { Header } from './components/layout/Header';
+import { AsciiArt } from './components/layout/AsciiArt';
+import { BridgeInterface } from './components/bridge/BridgeInterface';
+import { useAddress, useBalance } from "@thirdweb-dev/react";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const address = useAddress();
+  const { data: balance } = useBalance();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="min-h-screen bg-black flex flex-col pt-16">
+      <Header 
+        address={address}
+        balance={balance}
+      />
 
-export default App
+      <div className="flex-grow w-full px-0 py-6 font-mono">
+        <main className="">
+          <div className="flex flex-col sm:flex-row">
+            <AsciiArt className="my-0 sm:w-1/2" />
+            <div className="sm:w-1/4">
+              <div className="text-center">
+                <h1 className="text-2xl md:text-3xl mb-2 font-bold">
+                  // BRIDGE PLATFORM
+                </h1>
+                <p className="text-sm md:text-base opacity-70">
+                  TRANSFER TOKENS ACROSS CHAINS SECURELY.
+                </p>
+              </div>
+              <BridgeInterface isWalletConnected={!!address} />
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <footer className="text-center text-xs opacity-50 mt-8 py-4 bg-black w-full">
+        <p>© 2025 Reactive BRIDGE. All rights reserved.</p>
+      </footer>
+    </div>
+  );
+}
