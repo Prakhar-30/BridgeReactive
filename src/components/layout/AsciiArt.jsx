@@ -44,7 +44,7 @@ const UNICORN_ASCII = `
 
 export function AsciiArt({ className = '' }) {
   return (
-    <div className={`flex justify-center ${className}`}>
+    <div className={`flex mt-8 justify-center ${className}`}>
       <div className="transform scale-[1] origin-left">
         <pre 
           className="text-[8px] leading-[8px] font-mono opacity-70 whitespace-pre"
