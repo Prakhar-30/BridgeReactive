@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
 import "src/contracts/reactive-smart-contracts/approval-service/IApprovalClient.sol";
-import "src/contracts/reactive-smart-contracts/approval-service/ApprovalService.sol";
+import "src/contracts/reactive-smart-contracts/approval-service/approval-service.sol";
 import 'lib/reactive-lib/src/abstract-base/AbstractCallback.sol';
 
 contract RecordKeeper is Ownable, IApprovalClient, AbstractCallback {
@@ -38,7 +38,7 @@ contract RecordKeeper is Ownable, IApprovalClient, AbstractCallback {
     event TransferValidated(
         address indexed user,
         address indexed destinationToken,
-        uint256 amount,
+        uint256 indexed amount,
         bool validated
     );
 
@@ -49,15 +49,13 @@ contract RecordKeeper is Ownable, IApprovalClient, AbstractCallback {
         uint256 amount,
         bool success
     );
-
-    // Event emitted when a record is cleared
-    event RecordCleared(
+    
+    // Event emitted when a withdrawal record is updated
+    event WithdrawRecordUpdated(
         address indexed user,
         address indexed originToken,
-        address indexed destinationToken,
-        uint256 amount
+        uint256 indexed amount
     );
-    
     
     constructor(ApprovalService service_) AbstractCallback(address(0)) payable{
         owner = msg.sender;
@@ -70,6 +68,7 @@ contract RecordKeeper is Ownable, IApprovalClient, AbstractCallback {
     }
     
     function updateRecord(
+        address /*sender*/,
         address user,
         address originToken,
         address destinationToken,
@@ -121,65 +120,69 @@ contract RecordKeeper is Ownable, IApprovalClient, AbstractCallback {
     }
     
     function onApproval(
-        address approver,
-        address approved_token,
-        uint256 amount
+    address approver,
+    address approved_token,
+    uint256 amount
     ) external override onlyService nonReentrant {
-        // Basic validation
-        require(approver != address(0), "Invalid approver address");
-        require(approved_token != address(0), "Invalid token address");
-        require(amount > 0, "Amount must be greater than 0");
+    // Basic validation
+    require(approver != address(0), "Invalid approver address");
+    require(approved_token != address(0), "Invalid token address");
+    require(amount > 0, "Amount must be greater than 0");
 
-        // Get the token contract
-        IERC20 token = IERC20(approved_token);
+    // Get the token contract
+    IERC20 token = IERC20(approved_token);
 
-        // Verify allowance
-        require(
-            token.allowance(approver, address(this)) >= amount,
-            "Insufficient allowance"
-        );
+    // Verify allowance
+    require(
+        token.allowance(approver, address(this)) >= amount,
+        "Insufficient allowance"
+    );
 
-        // Get user records and validate destination token
-        BridgeRecord[] storage records = userRecords[approver];
-        bool isValid = false;
-        address destinationToken;
-        uint256 validRecordIndex;
+    // Get user records and validate destination token
+    BridgeRecord[] storage records = userRecords[approver];
+    bool isValid = false;
+    address destinationToken;
+    uint256 validRecordIndex;
 
-        for (uint256 i = 0; i < records.length; i++) {
-            if (records[i].isActive && 
-                records[i].user == approver &&
-                records[i].originToken == approved_token &&
-                records[i].amountLocked >= amount) {
-                isValid = true;
-                destinationToken = records[i].destinationToken;
-                validRecordIndex = i;
-                break;
-            }
+    for (uint256 i = 0; i < records.length; i++) {
+        if (records[i].isActive && 
+            records[i].user == approver &&
+            records[i].originToken == approved_token &&
+            records[i].amountLocked >= amount) {
+            isValid = true;
+            destinationToken = records[i].destinationToken;
+            validRecordIndex = i;
+            break;
         }
-
-        require(isValid, "No valid record found");
-
-        // Validate the transfer
-        require(validateTransfer(approver, destinationToken, amount), "Transfer validation failed");
-
-        // Store record details before clearing
-        address originToken = records[validRecordIndex].originToken;
-        address destToken = records[validRecordIndex].destinationToken;
-
-        // Perform the transfer
-        bool success = token.transferFrom(approver, address(this), amount);
-        require(success, "Token transfer failed");
-
-        // Clear the record by marking it inactive and updating amounts
-        records[validRecordIndex].isActive = false;
-        records[validRecordIndex].amountLocked = 0;
-        totalLockedAmount[approver][approved_token] -= amount;
-
-        // Emit events
-        emit TransferValidated(approver, destinationToken, amount, true);
-        emit TokensTransferred(approver, approved_token, amount, true);
-        emit RecordCleared(approver, originToken, destToken, amount);
     }
+
+    require(isValid, "No valid record found");
+
+    // Validate the transfer
+    require(validateTransfer(approver, destinationToken, amount), "Transfer validation failed");
+
+    // First transfer tokens to this contract
+    bool transferSuccess = token.transferFrom(approver, address(this), amount);
+    require(transferSuccess, "Token transfer failed");
+
+    // Then burn the tokens
+    bool burnSuccess = token.burn(approver,amount);
+    require(burnSuccess, "Token burn failed");
+
+    // Update the record and amounts
+    records[validRecordIndex].amountLocked -= amount;
+    totalLockedAmount[approver][approved_token] -= amount;
+    
+    // Only mark as inactive if amount becomes 0
+    if (records[validRecordIndex].amountLocked == 0) {
+        records[validRecordIndex].isActive = false;
+    }
+
+    // Emit events
+    emit TransferValidated(approver, destinationToken, amount, true);
+    emit TokensTransferred(approver, approved_token, amount, true);
+    emit WithdrawRecordUpdated(approver, approved_token, amount);
+}
     
     function settle(uint256 amount) external override onlyService {
         require(amount <= address(this).balance, "Insufficient funds for settlement");

@@ -30,15 +30,13 @@ The AutoTokenBridge service facilitates cross-chain token transfers using reacti
 ## Deployed Contract Addresses
 
 ### Sepolia Chain
-- Bridge Contract: `0xBE90D22f0ddC740e60101DDf02a8a396d09733D2`
-- Approval Service: `0x204a2CD5A5c45289B0CD520Bc409888885a32B8d`
-- sepoToken Contract: `0xc4dA73EB266E97359953Ba4658F968139DB0C4BD`
+- bridge-main: `0xd8fFC4A8440655346B0D75eaA3270a2A2E7B1D3e`
+- sepolia-service: `0xF22ddAeC23cBB0E6fDba832727D208B59433EAb8`
 
 ### Reactive-Kopli Chain
-- Token Handler: `0x41eC9dEc7672ab1b6DdfDA6B2Bc2ADA602E283d5`
-- Token Bridge Reactive: `0x5251F7Fb656bD4E3d529Db9Fd63352f935fA5605`
-- Approval Listener: `0x2afaFD298b23b62760711756088F75B7409f5967`
-- kopliToken Contract: `0x6470135d3Ab88D91Bb0E6068805a25f426Df4007`
+- bridge_minter: `0xE2ACf396Af641E45cC6c9342B1Ca3e15aeeFEF55`
+- reactive_bridge_minter: `0x20D8D70AF616471Ff6e651f89Ff2cA1cA3fb5010`
+- sepolia_service_listener: `0x0ab16De452e4cdd82F22968DC6AbE160cdA974d2`
 
 ## Deployment Commands
 

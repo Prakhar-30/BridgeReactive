@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 import "lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
 import "src/contracts/reactive-smart-contracts/approval-service/IApprovalClient.sol";
-import "src/contracts/reactive-smart-contracts/approval-service/ApprovalService.sol";
+import "src/contracts/reactive-smart-contracts/approval-service/approval-service.sol";
 import 'lib/reactive-lib/src/abstract-base/AbstractCallback.sol';
 
 contract Bridge is ReentrancyGuard, IApprovalClient, AbstractCallback {

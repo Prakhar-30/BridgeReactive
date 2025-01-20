@@ -7,7 +7,7 @@ const createChainPairKey = (originChainId, destinationChainId) =>
 // Bridge contract addresses mapped to specific chain pairs
 export const BRIDGE_CONTRACTS = {
   // Sepolia -> Kopli
-  [createChainPairKey("11155111", "5318008")]: "0xBE90D22f0ddC740e60101DDf02a8a396d09733D2",
+  [createChainPairKey("11155111", "5318008")]: "0xf4840dC0E53Dc6BD48e5E115CEe645022c63ad72",
 };
 
 // Function to get contract address for a specific chain pair

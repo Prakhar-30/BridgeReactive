@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 
 import 'lib/reactive-lib/src/interfaces/ISubscriptionService.sol';
 import 'lib/reactive-lib/src/abstract-base/AbstractReactive.sol';
-import './ApprovalService.sol';
+import './approval-service.sol';
 
 contract ApprovalListener is AbstractReactive {
     uint256 private constant REACTIVE_CHAIN_ID = 0x512578;
@@ -75,38 +75,30 @@ contract ApprovalListener is AbstractReactive {
 
     // Methods specific to ReactVM contract instance
     function react(
-        uint256 /* chain_id */,
-        address _contract,
-        uint256 topic_0,
-        uint256 topic_1,
-        uint256 topic_2,
-        uint256 /* topic_3 */,
-        bytes calldata data,
-        uint256 /* block_number */,
-        uint256 /* op_code */
+        LogRecord calldata log
     ) external vmOnly {
-        if (topic_0 == SUBSCRIBE_TOPIC_0) {
+        if (log.topic_0 == SUBSCRIBE_TOPIC_0) {
             bytes memory payload = abi.encodeWithSignature(
                 "subscribe(address,address)",
                 address(0),
-                address(uint160(topic_1))
+                address(uint160(log.topic_1))
             );
             emit Callback(REACTIVE_CHAIN_ID, address(this), CALLBACK_GAS_LIMIT, payload);
-        } else if (topic_0 == UNSUBSCRIBE_TOPIC_0) {
+        } else if (log.topic_0 == UNSUBSCRIBE_TOPIC_0) {
             bytes memory payload = abi.encodeWithSignature(
                 "unsubscribe(address,address)",
                 address(0),
-                address(uint160(topic_1))
+                address(uint160(log.topic_1))
             );
             emit Callback(REACTIVE_CHAIN_ID, address(this), CALLBACK_GAS_LIMIT, payload);
         } else {
-            (uint256 amount) = abi.decode(data, (uint256));
+            (uint256 amount) = abi.decode(log.data, (uint256));
             bytes memory payload = abi.encodeWithSignature(
                 "onApproval(address,address,address,address,uint256)",
                 address(0),
-                address(uint160(topic_2)),
-                address(uint160(topic_1)),
-                _contract,
+                address(uint160(log.topic_2)),
+                address(uint160(log.topic_1)),
+                log._contract,
                 amount
             );
             emit Callback(SEPOLIA_CHAIN_ID, address(approval_service), CALLBACK_GAS_LIMIT, payload);
