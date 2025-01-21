@@ -15,7 +15,9 @@ contract ApprovalService is AbstractCallback {
         address indexed subscriber
     );
 
-    address private constant CALLBACK_SENDER_ADDR = 0x33Bbb7D0a2F1029550B0e91f653c4055DC9F4Dd8;
+    address private constant CALLBACK_SENDER_ADDR = 0x33Bbb7D0a2F1029550B0e91f653c4055DC9F4Dd8; //for sepolia
+
+    
 
     address payable private owner;
     uint256 public subscription_fee;

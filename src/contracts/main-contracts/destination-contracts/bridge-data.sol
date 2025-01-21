@@ -1,32 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
-import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
-import "src/contracts/reactive-smart-contracts/approval-service/IApprovalClient.sol";
-import "src/contracts/reactive-smart-contracts/approval-service/approval-service.sol";
 import 'lib/reactive-lib/src/abstract-base/AbstractCallback.sol';
+import 'src/contracts/main-contracts/bridge-erc20.sol';
 
-contract RecordKeeper is Ownable, IApprovalClient, AbstractCallback {
-    // Approval service instance
-    ApprovalService private immutable service;
+contract RecordKeeper is AbstractCallback {
     
-    // Structure to store bridge records
     struct BridgeRecord {
         address user;
         address originToken;
         address destinationToken;
         uint256 amountLocked;
+        uint256 amountBurned;
         bool isActive;
     }
     
-    // Mapping of user address to their bridge records
     mapping(address => BridgeRecord[]) public userRecords;
-    
-    // Mapping to track total amounts locked per user per token
     mapping(address => mapping(address => uint256)) public totalLockedAmount;
     
-    // Event emitted when a record is updated
     event RecordUpdated(
         address indexed user,
         address indexed originToken,
@@ -34,60 +25,35 @@ contract RecordKeeper is Ownable, IApprovalClient, AbstractCallback {
         uint256 amountLocked
     );
     
-    // Event emitted when a transfer is validated
-    event TransferValidated(
-        address indexed user,
-        address indexed destinationToken,
-        uint256 indexed amount,
-        bool validated
-    );
-
-    // Event emitted when tokens are transferred after approval
-    event TokensTransferred(
-        address indexed user,
-        address indexed token,
-        uint256 amount,
-        bool success
-    );
-    
-    // Event emitted when a withdrawal record is updated
-    event WithdrawRecordUpdated(
+    event TokensBurned(
         address indexed user,
         address indexed originToken,
         uint256 indexed amount
     );
     
-    constructor(ApprovalService service_) AbstractCallback(address(0)) payable{
-        owner = msg.sender;
-        service = service_;
-    }
-    
-    modifier onlyService() {
-        require(msg.sender == address(service), "Not authorized");
-        _;
+    constructor(address callbackAddress) AbstractCallback(callbackAddress) payable {
     }
     
     function updateRecord(
-        address /*sender*/,
+        address /*spender*/,
         address user,
         address originToken,
         address destinationToken,
         uint256 amountLocked
-    ) external onlyOwner {
+    ) external {
         require(user != address(0), "Invalid user address");
         require(originToken != address(0), "Invalid origin token");
         require(destinationToken != address(0), "Invalid destination token");
         require(amountLocked > 0, "Amount must be greater than 0");
         
-        // Update total locked amount
         totalLockedAmount[user][originToken] += amountLocked;
         
-        // Create new record
         BridgeRecord memory newRecord = BridgeRecord({
             user: user,
             originToken: originToken,
             destinationToken: destinationToken,
             amountLocked: amountLocked,
+            amountBurned: 0,
             isActive: true
         });
         
@@ -109,85 +75,54 @@ contract RecordKeeper is Ownable, IApprovalClient, AbstractCallback {
         
         for (uint256 i = 0; i < records.length; i++) {
             if (records[i].isActive && 
-                records[i].user == user &&
                 records[i].destinationToken == destinationToken &&
-                records[i].amountLocked >= amount) {
+                records[i].amountLocked >= (records[i].amountBurned + amount)) {
                 return true;
             }
         }
         
         return false;
     }
-    
-    function onApproval(
-    address approver,
-    address approved_token,
-    uint256 amount
-    ) external override onlyService nonReentrant {
-    // Basic validation
-    require(approver != address(0), "Invalid approver address");
-    require(approved_token != address(0), "Invalid token address");
-    require(amount > 0, "Amount must be greater than 0");
 
-    // Get the token contract
-    IERC20 token = IERC20(approved_token);
+    function burnTokens(
+        address burningToken,
+        uint256 amount
+    ) external {
+        address user = msg.sender;
+        require(burningToken != address(0), "Invalid token address");
+        require(amount > 0, "Amount must be greater than 0");
 
-    // Verify allowance
-    require(
-        token.allowance(approver, address(this)) >= amount,
-        "Insufficient allowance"
-    );
+        BridgeRecord[] storage records = userRecords[user];
+        bool isValid = false;
+        uint256 validRecordIndex;
 
-    // Get user records and validate destination token
-    BridgeRecord[] storage records = userRecords[approver];
-    bool isValid = false;
-    address destinationToken;
-    uint256 validRecordIndex;
-
-    for (uint256 i = 0; i < records.length; i++) {
-        if (records[i].isActive && 
-            records[i].user == approver &&
-            records[i].originToken == approved_token &&
-            records[i].amountLocked >= amount) {
-            isValid = true;
-            destinationToken = records[i].destinationToken;
-            validRecordIndex = i;
-            break;
+        // Changed to check destination token instead of origin token
+        for (uint256 i = 0; i < records.length; i++) {
+            if (records[i].isActive && 
+                records[i].destinationToken == burningToken &&  // Changed this line
+                records[i].amountLocked >= (records[i].amountBurned + amount)) {
+                isValid = true;
+                validRecordIndex = i;
+                break;
+            }
         }
-    }
 
-    require(isValid, "No valid record found");
+        require(isValid, "No valid record found or insufficient balance");
 
-    // Validate the transfer
-    require(validateTransfer(approver, destinationToken, amount), "Transfer validation failed");
+        // Try to burn the tokens
+        try BridgeToken(burningToken).burn(user, amount) {
+            // Update the record after successful burn
+            records[validRecordIndex].amountBurned += amount;
+            totalLockedAmount[user][records[validRecordIndex].originToken] -= amount;  // Updated this line
+            
+            // Mark as inactive if fully burned
+            if (records[validRecordIndex].amountBurned >= records[validRecordIndex].amountLocked) {
+                records[validRecordIndex].isActive = false;
+            }
 
-    // First transfer tokens to this contract
-    bool transferSuccess = token.transferFrom(approver, address(this), amount);
-    require(transferSuccess, "Token transfer failed");
-
-    // Then burn the tokens
-    bool burnSuccess = token.burn(approver,amount);
-    require(burnSuccess, "Token burn failed");
-
-    // Update the record and amounts
-    records[validRecordIndex].amountLocked -= amount;
-    totalLockedAmount[approver][approved_token] -= amount;
-    
-    // Only mark as inactive if amount becomes 0
-    if (records[validRecordIndex].amountLocked == 0) {
-        records[validRecordIndex].isActive = false;
-    }
-
-    // Emit events
-    emit TransferValidated(approver, destinationToken, amount, true);
-    emit TokensTransferred(approver, approved_token, amount, true);
-    emit WithdrawRecordUpdated(approver, approved_token, amount);
-}
-    
-    function settle(uint256 amount) external override onlyService {
-        require(amount <= address(this).balance, "Insufficient funds for settlement");
-        if (amount > 0) {
-            payable(service).transfer(amount);
+            emit TokensBurned(user, records[validRecordIndex].originToken, amount);
+        } catch {
+            revert("Token burn failed");
         }
     }
     

@@ -5,11 +5,11 @@ import 'lib/reactive-lib/src/abstract-base/AbstractReactive.sol';
 import 'lib/reactive-lib/src/interfaces/ISubscriptionService.sol';
 import 'lib/reactive-lib/src/interfaces/IReactive.sol';
 
-contract BRIDGE_SEPO_TO_KOPLI is AbstractReactive {
+contract REACTIVE_SEPO_WITHDRAWL is AbstractReactive {
     uint256 private constant ORIGIN_CHAIN_ID = 5318008;
     uint256 private constant DESTINATION_CHAIN_ID = 11155111;
     uint64 private constant CALLBACK_GAS_LIMIT = 3000000;
-    uint256 private constant TOKENS_WITHDRAWAL_TOPIC = 0xbd44e2822c2eeff147cacf9e502f4cef52db0dfe061ef7bfb9d48196e25a6c78;
+    uint256 private constant TOKENS_BURNED_TOPIC = 0x63fb3ef5ac3671827498b9955f358a3ab848e737cec174ff106c9867efb72b58;
     
     address private immutable origin_contract;
     address private immutable destination_contract;
@@ -24,7 +24,7 @@ contract BRIDGE_SEPO_TO_KOPLI is AbstractReactive {
             try service.subscribe(
                 ORIGIN_CHAIN_ID,
                 Origin_Contract,
-                TOKENS_WITHDRAWAL_TOPIC,
+                TOKENS_BURNED_TOPIC,
                 REACTIVE_IGNORE,
                 REACTIVE_IGNORE,
                 REACTIVE_IGNORE

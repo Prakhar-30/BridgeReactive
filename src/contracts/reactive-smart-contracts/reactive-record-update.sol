@@ -5,7 +5,7 @@ import 'lib/reactive-lib/src/abstract-base/AbstractReactive.sol';
 import 'lib/reactive-lib/src/interfaces/ISubscriptionService.sol';
 import 'lib/reactive-lib/src/interfaces/IReactive.sol';
 
-contract BRIDGE_RECORD is AbstractReactive{
+contract BRIDGE_RECORD_UPDTAE is AbstractReactive{
     uint256 private constant ORIGIN_CHAIN_ID = 11155111;
     uint256 private constant DESTINATION_CHAIN_ID = 5318008;
     uint64 private constant CALLBACK_GAS_LIMIT = 3000000;

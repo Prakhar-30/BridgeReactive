@@ -4,24 +4,8 @@ A reactive smart contract-based bridging service that enables secure token trans
 
 ## Architecture
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant TokenContract as Token Contract (Sepolia)
-    participant ApprovalService as Approval Service (Sepolia)
-    participant Bridge as Bridge Contract (Sepolia)
-    participant ReactiveContract as Reactive Contract (Kopli)
-    participant TokenHandler as Token Handler (Kopli)
+![ARCHITECTURE](public/README-IMAGE.png)
 
-    User->>TokenContract: Approve tokens for Bridge
-    TokenContract-->>ApprovalService: Emit Approval event
-    ApprovalService->>Bridge: Execute token transfer
-    Bridge->>TokenContract: Transfer tokens from user
-    Bridge->>Bridge: Emit TokensBridged event
-    ReactiveContract->>ReactiveContract: Listen for TokensBridged
-    ReactiveContract->>TokenHandler: Call mintTokens()
-    TokenHandler-->>User: Mint equivalent tokens
-```
 
 ## Overview
 
@@ -30,13 +14,16 @@ The AutoTokenBridge service facilitates cross-chain token transfers using reacti
 ## Deployed Contract Addresses
 
 ### Sepolia Chain
-- bridge-main: `0xd8fFC4A8440655346B0D75eaA3270a2A2E7B1D3e`
-- sepolia-service: `0xF22ddAeC23cBB0E6fDba832727D208B59433EAb8`
+- approval_service: `0x5b6F2559fdE64344C2d74198e4006C35ee3f38B9`
+- bridge_main: `0xbccb3370c70fFb6d86a8507AAc66fF00b8c940A3`
 
 ### Reactive-Kopli Chain
-- bridge_minter: `0xE2ACf396Af641E45cC6c9342B1Ca3e15aeeFEF55`
-- reactive_bridge_minter: `0x20D8D70AF616471Ff6e651f89Ff2cA1cA3fb5010`
-- sepolia_service_listener: `0x0ab16De452e4cdd82F22968DC6AbE160cdA974d2`
+- approval_listener: `0x24d7958430C77Ae7DDbd0961556386022DC33473`
+- bridge_minter: `0xD5ac0437E7B9612F1eFc016B7F2F44Eb9fD7241e`
+- reactive_bridge_minter: `0xc3AbD988801f8b31c7EC92c5B6F34c3A00A6e865`
+- bridge_data: `0xd4eCF818D17C7218Da6b171e1F68886C857e23Ef`
+- reactive_record_update: `0x2C16c76A0464654B3fee042ac7ac44c6c82b1c2e`
+- reactive_bridge_withdrawl: `0xbE4Ebf311ACD275f5D11C9833e16810961C975d8`
 
 ## Deployment Commands
 

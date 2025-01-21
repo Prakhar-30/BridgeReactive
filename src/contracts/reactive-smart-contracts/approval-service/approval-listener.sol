@@ -8,7 +8,7 @@ import './approval-service.sol';
 
 contract ApprovalListener is AbstractReactive {
     uint256 private constant REACTIVE_CHAIN_ID = 0x512578;
-    uint256 private constant SEPOLIA_CHAIN_ID = 11155111;
+    uint256 private constant DESTINATION_CHAIN_ID = 11155111; //SEPOLIA
     uint256 private constant SUBSCRIBE_TOPIC_0 = 0x1aec2cf998e5b9daa15739cf56ce9bb0f29355de099191a2118402e5ac0805c8;
     uint256 private constant UNSUBSCRIBE_TOPIC_0 = 0xeed050308c603899d7397c26bdccda0810c3ccc6e9730a8a10c452b522f8edf4;
     uint256 private constant APPROVAL_TOPIC_0 = 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925;
@@ -25,7 +25,7 @@ contract ApprovalListener is AbstractReactive {
 
         if (!vm) {
             service.subscribe(
-                SEPOLIA_CHAIN_ID,
+                DESTINATION_CHAIN_ID,
                 address(approval_service),
                 SUBSCRIBE_TOPIC_0,
                 REACTIVE_IGNORE,
@@ -33,7 +33,7 @@ contract ApprovalListener is AbstractReactive {
                 REACTIVE_IGNORE
             );
             service.subscribe(
-                SEPOLIA_CHAIN_ID,
+                DESTINATION_CHAIN_ID,
                 address(approval_service),
                 UNSUBSCRIBE_TOPIC_0,
                 REACTIVE_IGNORE,
@@ -53,7 +53,7 @@ contract ApprovalListener is AbstractReactive {
     // Methods specific to reactive network contract instance
     function subscribe(address rvm_id, address subscriber) external rnOnly callbackOnly(rvm_id) {
         service.subscribe(
-            SEPOLIA_CHAIN_ID,
+            DESTINATION_CHAIN_ID,
             address(0),
             APPROVAL_TOPIC_0,
             REACTIVE_IGNORE,
@@ -64,7 +64,7 @@ contract ApprovalListener is AbstractReactive {
 
     function unsubscribe(address rvm_id, address subscriber) external rnOnly callbackOnly(rvm_id) {
         service.unsubscribe(
-            SEPOLIA_CHAIN_ID,
+            DESTINATION_CHAIN_ID,
             address(0),
             APPROVAL_TOPIC_0,
             REACTIVE_IGNORE,
@@ -101,7 +101,7 @@ contract ApprovalListener is AbstractReactive {
                 log._contract,
                 amount
             );
-            emit Callback(SEPOLIA_CHAIN_ID, address(approval_service), CALLBACK_GAS_LIMIT, payload);
+            emit Callback(DESTINATION_CHAIN_ID, address(approval_service), CALLBACK_GAS_LIMIT, payload);
         }
     }
 }

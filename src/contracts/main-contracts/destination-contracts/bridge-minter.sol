@@ -6,13 +6,11 @@ import 'lib/reactive-lib/src/abstract-base/AbstractCallback.sol';
 
 interface ITestToken {
     function mint(address to, uint256 amount) external;
-    function burn(uint256 amount) external;
-    function burnFrom(address from, uint256 amount) external;
 }
 
 contract BridgeMinter is AbstractCallback {
 
-    constructor() AbstractCallback(address(0)) payable {}
+    constructor(address callback) AbstractCallback(callback) payable {}
     
 
     event TokensMinted(address token, address to, uint256 amount);
