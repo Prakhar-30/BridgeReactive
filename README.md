@@ -23,7 +23,7 @@ The AutoTokenBridge service facilitates cross-chain token transfers using reacti
 - reactive_bridge_minter: `0xc3AbD988801f8b31c7EC92c5B6F34c3A00A6e865`
 - bridge_data: `0xd4eCF818D17C7218Da6b171e1F68886C857e23Ef`
 - reactive_record_update: `0x2C16c76A0464654B3fee042ac7ac44c6c82b1c2e`
-- reactive_bridge_withdrawl: `0xbE4Ebf311ACD275f5D11C9833e16810961C975d8`
+- reactive_bridge_withdrawl: `0x5C809e530E86C40DC35f47389647FCAa7cc97dA5`
 
 ## Deployment Commands
 
