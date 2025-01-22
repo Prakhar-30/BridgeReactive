@@ -9,7 +9,7 @@ contract REACTIVE_SEPO_WITHDRAWL is AbstractReactive {
     uint256 private constant ORIGIN_CHAIN_ID = 5318008;
     uint256 private constant DESTINATION_CHAIN_ID = 11155111;
     uint64 private constant CALLBACK_GAS_LIMIT = 3000000;
-    uint256 private constant TOKENS_BURNED_TOPIC = 0x63fb3ef5ac3671827498b9955f358a3ab848e737cec174ff106c9867efb72b58;
+    uint256 private constant TOKENS_BURNED_TOPIC = 0x857ac1c9e97cc66ecae5f524c9c611463ae748b85af3ca454a5ec4d7d341924d;
     
     address private immutable origin_contract;
     address private immutable destination_contract;
